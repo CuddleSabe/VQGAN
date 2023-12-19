@@ -1,0 +1,149 @@
+# general settings
+name: VQGAN_Multi_FFHQ_codebook64
+model_type: VQGANModel
+scale: 1
+num_gpu: auto  # auto: can infer from your visible devices automatically. official: 4 GPUs
+manual_seed: 0
+
+# ----------------- options for synthesizing training data in RealESRGANModel ----------------- #
+# USM the ground-truth
+l1_gt_usm: False
+percep_gt_usm: False
+gan_gt_usm: False
+
+gt_size: 256
+queue_size: 160
+
+# dataset and data loader settings
+datasets:
+  train:
+    name: FFHQ
+    type: VQGANPairedDataset
+    dataroot_gt: /root/cloud/data-collection/ffhq-dataset/images256x256
+    meta_info: /root/picasso/韩昊天/画质修复/VQGAN/options/meta_info_ffhq.txt
+    io_backend:
+      type: disk
+
+    gt_size: 256
+    use_hflip: True
+    use_rot: False
+
+    # data loader
+    use_shuffle: true
+    num_worker_per_gpu: 10
+    batch_size_per_gpu: 8
+    dataset_enlarge_ratio: 1
+    prefetch_mode: ~
+
+# network structures
+network_g:
+  type: VQVAE_multi_codebook
+  input_dim: 48
+  dim: 64
+  n_embedding: 256
+  n_codebook: 64
+
+
+network_d:
+  type: VAEUNetDiscriminatorSN
+  num_in_ch: 3
+  num_feat: 64
+  skip_connection: True
+
+path:
+  # use the pre-trained Real-ESRNet model
+  pretrain_network_g: /root/picasso/韩昊天/画质修复/VQGAN/experiments/VQVAE_Multi_FFHQ_codebook64/models/net_g_latest.pth
+  strict_load_g: True
+  resume_state: ~
+
+# training settings
+train:
+  ema_decay: 0.999
+  optim_g:
+    type: Adam
+    lr: !!float 1e-4
+    weight_decay: 0
+    betas: [0.9, 0.99]
+    
+  optim_d:
+    type: Adam
+    lr: !!float 1e-4
+    weight_decay: 0
+    betas: [0.9, 0.99]
+
+  scheduler:
+    type: MultiStepLR
+    milestones: [400000]
+    gamma: 0.5
+  
+  encoder_iter: 100000
+  total_iter: 400000
+  lr_encoder: !!float 2e-4
+  lr_sr: !!float 1e-4
+  gamma_encoder: 0.1
+  gamma_sr: 0.5
+  lr_decay_encoder: 60000
+  lr_decay_sr: 300000
+  warmup_iter: -1  # no warm up
+
+
+  # losses
+  pixel_opt:
+    type: L1Loss
+    loss_weight: 1.0
+    reduction: mean
+  # perceptual loss (content and style losses)
+  perceptual_opt:
+    type: PerceptualLoss
+    layer_weights:
+      # before relu
+      'conv1_2': 0.1
+      'conv2_2': 0.1
+      'conv3_4': 1
+      'conv4_4': 1
+      'conv5_4': 1
+    vgg_type: vgg19
+    use_input_norm: true
+    perceptual_weight: !!float 1.0
+    style_weight: 0
+    range_norm: false
+    criterion: l1
+  # gan loss
+  gan_opt:
+    type: GANLoss
+    gan_type: vanilla
+    real_label_val: 1.0
+    fake_label_val: 0.0
+    loss_weight: !!float 0.1
+
+  net_d_iters: 1
+  net_d_init_iters: 0
+
+# Uncomment these for validation
+# validation settings
+
+val:
+  window_size: 32
+  val_freq: !!float 5e4
+  save_img: False
+
+  metrics:
+    psnr: # metric name
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: true
+
+
+# logging settings
+logger:
+  print_freq: 1000
+  save_checkpoint_freq: !!float 5e4
+  use_tb_logger: true
+  wandb:
+    project: ~
+    resume_id: ~
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500

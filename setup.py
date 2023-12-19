@@ -9,7 +9,7 @@ import time
 import torch
 from torch.utils.cpp_extension import BuildExtension, CppExtension, CUDAExtension
 
-version_file = 'basicsr/version.py'
+version_file = 'VQGAN/version.py'
 
 
 def readme():
@@ -133,13 +133,13 @@ if __name__ == '__main__':
 
     write_version_py()
     setup(
-        name='basicsr',
+        name='vqgan',
         version=get_version(),
         description='Open Source Image and Video Super-Resolution Toolbox',
         long_description=readme(),
         long_description_content_type='text/markdown',
-        author='Xintao Wang',
-        author_email='xintao.wang@outlook.com',
+        author='Haotian Han',
+        author_email='hanhaotian0216@163.com',
         keywords='computer vision, restoration, super resolution',
         url='https://github.com/xinntao/BasicSR',
         include_package_data=True,
