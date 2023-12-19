@@ -9,8 +9,8 @@ python setup.py develop
 '''
 
 ## Download
-[Baidu](https://pan.baidu.com/s/1-LhE70tNA0YX38YUUkDi4A?pwd=fxvu) 提取码：fxvu
-[Google](https://drive.google.com/drive/folders/1tdxILPP8MIBROB79RwGuA1Bv-CymRmt7?usp=share_link)
+1. [Baidu](https://pan.baidu.com/s/1-LhE70tNA0YX38YUUkDi4A?pwd=fxvu) 提取码：fxvu
+2. [Google](https://drive.google.com/drive/folders/1tdxILPP8MIBROB79RwGuA1Bv-CymRmt7?usp=share_link)
 
 ## Train
 1. ''' bash
